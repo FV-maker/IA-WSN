@@ -39,7 +39,7 @@ if not df.empty:
     plt.savefig("grafico_boxplot_q_grupos.png", dpi=300)
     plt.show()
 else:
-    print("⚠️ No hay datos numéricos válidos en 'origen' para agrupar.")
+    print(" No hay datos numéricos válidos en 'origen' para agrupar.")
 # === Cargar recompensas por episodio ===
 recompensas = pd.read_csv("resultados_q_learning_splstm/recompensas.csv")
 
@@ -64,4 +64,4 @@ if "episodio" in recompensas.columns and "recompensa" in recompensas.columns:
     plt.savefig("grafico_recompensa_vs_episodio.png", dpi=300)
     plt.show()
 else:
-    print("⚠️ El archivo recompensas.csv no contiene columnas 'episodio' y 'recompensa'.")
+    print(" El archivo recompensas.csv no contiene columnas 'episodio' y 'recompensa'.")

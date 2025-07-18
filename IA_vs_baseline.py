@@ -56,4 +56,4 @@ crear_grafico(consumo_vals, "Joules", "Consumo Energético", "figura_consumo.png
 crear_grafico(latencia_vals, "Milisegundos", "Saltos promedio", "figura_latencia.png")
 crear_grafico(pdr_vals, "Porcentaje (%)", "Packet Delivery Ratio (PDR)", "figura_pdr.png")
 
-print("✅ Figuras generadas: figura_consumo.png, figura_latencia.png, figura_pdr.png")
+print(" Figuras generadas: figura_consumo.png, figura_latencia.png, figura_pdr.png")

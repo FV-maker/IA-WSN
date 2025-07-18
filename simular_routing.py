@@ -132,4 +132,4 @@ with open(f"{OUTPUT_DIR}/pdr.txt", "w") as f:
 pd.DataFrame({"latencia_promedio": [latencia_prom]}).to_csv(f"{OUTPUT_DIR}/latencia.csv", index=False)
 pd.DataFrame({"consumo_promedio": [consumo_prom]}).to_csv(f"{OUTPUT_DIR}/consumo.csv", index=False)
 
-logging.info(f"✅ Simulación completada | PDR = {pdr:.2f}, Latencia = {latencia_prom:.2f}, Consumo = {consumo_prom:.2f}")
+logging.info(f"Simulación completada | PDR = {pdr:.2f}, Latencia = {latencia_prom:.2f}, Consumo = {consumo_prom:.2f}")

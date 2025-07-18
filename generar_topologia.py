@@ -69,7 +69,7 @@ while True:
 
 # === Guardar CSV ===
 df_topo.to_csv(f"{OUTPUT_DIR}/topologia_nodos.csv", index=False)    # Guarda la topología en un archivo CSV
-print(f"✅ Topología agrícola generada correctamente en {intentos} intentos.")
+print(f" Topología agrícola generada correctamente en {intentos} intentos.")
 
 # === Visualización ===
 plt.figure(figsize=(10, 10))

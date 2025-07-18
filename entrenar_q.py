@@ -130,7 +130,7 @@ for ep in range(EPISODIOS):
     logging.info(f"[EP {ep+1:03}] Recompensa total = {total_reward:.1f} | Epsilon = {EPSILON:.3f} | Tiempo = {dur_ep:.1f}s")
 
 dur_total = time.time() - start_global
-logging.info(f"✅ Entrenamiento finalizado en {dur_total/60:.2f} minutos.")
+logging.info(f" Entrenamiento finalizado en {dur_total/60:.2f} minutos.")
 
 # === Guardar resultados ===
 pd.DataFrame({"episodio": list(range(EPISODIOS)), "recompensa_total": rewards}).to_csv(f"{QLEARN_DIR}/recompensas.csv", index=False)

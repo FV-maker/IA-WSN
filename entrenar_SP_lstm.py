@@ -63,7 +63,7 @@ history = model.fit(
 
 # === Guardar modelo
 model.save(f"{MODEL_DIR}/modelo_entrenado.keras")
-print("✅ SP-LSTM entrenado correctamente.")
+print("SP-LSTM entrenado correctamente.")
 
 # === Curva de entrenamiento
 plt.plot(history.history['loss'], label='MSE (Train)')
@@ -88,4 +88,4 @@ with open(f"{MODEL_DIR}/metricas.txt", "w") as f:
     f.write(f"MSE: {mse:.6f}\n")
     f.write(f"R2 Score: {r2:.6f}\n")
 
-print("📊 Evaluación completada. Métricas guardadas en 'metricas.txt'.")
+print("Evaluación completada. Métricas guardadas en 'metricas.txt'.")

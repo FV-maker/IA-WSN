@@ -60,7 +60,7 @@ df["Time_Average_Throughput"] = (
 
 # === Exportar ===
 df.to_csv(f"{OUTPUT_DIR}/Dataset.csv", index=False)     # Exporta el dataset enriquecido
-print(f"✅ Dataset dinámico enriquecido generado: {len(df)} muestras.")
+print(f" Dataset dinámico enriquecido generado: {len(df)} muestras.")
 
 # === Clasificación discreta del throughput ===
 def clasificar(val):
@@ -89,4 +89,4 @@ print(f"📊 Clases después del balanceo:\n{df_balanceado['clase'].value_counts
 
 # === Guardar dataset balanceado ===
 df_balanceado.drop(columns=["clase"]).to_csv(f"{OUTPUT_DIR}/Dataset.csv", index=False)  # Exporta el dataset balanceado
-print(f"✅ Dataset balanceado exportado a: {OUTPUT_DIR}/Dataset.csv")
+print(f" Dataset balanceado exportado a: {OUTPUT_DIR}/Dataset.csv")

@@ -79,13 +79,13 @@ df["clase"] = df["throughput_instantaneo"].apply(clasificar)  # Clasifica cada m
 
 # === Balanceo por undersampling ===
 min_count = df["clase"].value_counts().min()                  # Encuentra la clase menos representada
-print(f"📊 Clases antes del balanceo:\n{df['clase'].value_counts()}")
+print(f" Clases antes del balanceo:\n{df['clase'].value_counts()}")
 df_balanceado = (
     df.groupby("clase", group_keys=False)
     .apply(lambda x: x.sample(min_count, random_state=42))    # Toma igual número de muestras por clase
     .reset_index(drop=True)
 )
-print(f"📊 Clases después del balanceo:\n{df_balanceado['clase'].value_counts()}")
+print(f" Clases después del balanceo:\n{df_balanceado['clase'].value_counts()}")
 
 # === Guardar dataset balanceado ===
 df_balanceado.drop(columns=["clase"]).to_csv(f"{OUTPUT_DIR}/Dataset.csv", index=False)  # Exporta el dataset balanceado

@@ -39,7 +39,7 @@ joblib.dump(scaler, f"{MODEL_DIR}/scaler_X.save")
 
 # === División de datos
 X_seq_train, X_seq_test, X_aux_train, X_aux_test, y_train, y_test = train_test_split(
-    X_seq, X_aux_scaled, y, test_size=0.2, random_state=SEED, shuffle=True
+    X_seq, X_aux_scaled, y, test_size=0.2, random_state=None, shuffle=True
 )
 
 # === Construcción del modelo

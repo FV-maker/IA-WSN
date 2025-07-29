@@ -4,7 +4,7 @@ import math
 import os
 
 # === Configuración ===
-TIEMPO_SIMULACION = 1000                         # Número de instantes de simulación
+TIEMPO_SIMULACION = 100                         # Número de instantes de simulación
 RANGO_COMUNICACION = 55                          # Rango de comunicación entre nodos (metros)
 NOISE_STD = 0.1                                  # Desviación estándar del ruido (simulación)
 VENTANA_PROMEDIO = 5                             # Ventana para el promedio móvil

@@ -10,13 +10,6 @@ from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 import matplotlib.pyplot as plt
 from splstm_2 import SP_LSTM
 
-# === Reproducibilidad total ===
-SEED = 42
-np.random.seed(SEED)
-tf.random.set_seed(SEED)
-random.seed(SEED)
-os.environ["PYTHONHASHSEED"] = str(SEED)
-
 
 # === Rutas y configuración ===
 DATA_PATH = "Dataset/Dataset.csv"

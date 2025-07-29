@@ -1,3 +1,5 @@
+"""Simula el enrutamiento inteligente usando SP‑LSTM y Q‑Learning."""
+
 import pandas as pd
 import numpy as np
 import networkx as nx
@@ -55,6 +57,22 @@ cache_pred = {}
 
 # Función para predecir el throughput de un enlace usando el modelo SP-LSTM
 def predecir_throughput(a, b, t):
+    """Obtiene una predicción de throughput para el enlace indicado.
+
+    Parameters
+    ----------
+    a : str
+        Nodo de origen del enlace.
+    b : str
+        Nodo destino del enlace.
+    t : int
+        Instante de tiempo de la simulación.
+
+    Returns
+    -------
+    float
+        Valor de throughput estimado en el rango [0, 1].
+    """
     key = (a, b, t)
     if key in cache_pred:
         return cache_pred[key]

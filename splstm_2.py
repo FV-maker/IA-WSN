@@ -3,7 +3,18 @@ import tensorflow as tf
 from tensorflow.keras.layers import Layer
 
 class SP_LSTM_Cell(Layer):
+    """Célula básica de la arquitectura SP-LSTM."""
+
     def __init__(self, units, input_dim, **kwargs):
+        """Inicializa los pesos de la celda.
+
+        Parameters
+        ----------
+        units : int
+            Número de unidades internas.
+        input_dim : int
+            Dimensión de la entrada en cada paso de tiempo.
+        """
         super(SP_LSTM_Cell, self).__init__(**kwargs)
         self.units = units
         self.input_dim = input_dim
@@ -25,6 +36,8 @@ class SP_LSTM_Cell(Layer):
         super(SP_LSTM_Cell, self).build(input_shape)
 
     def call(self, inputs, states):
+        """Realiza un paso de tiempo de la celda."""
+
         h_prev, c_prev = states
         x = tf.concat([inputs, h_prev], axis=1)
 
@@ -38,7 +51,21 @@ class SP_LSTM_Cell(Layer):
         return h, [h, c]
 
 class SP_LSTM(Layer):
+    """Capa recurrente compuesta por celdas :class:`SP_LSTM_Cell`."""
+
     def __init__(self, units, input_dim, return_sequences=False, **kwargs):
+        """Crea la capa SP-LSTM.
+
+        Parameters
+        ----------
+        units : int
+            Número de unidades internas de la celda.
+        input_dim : int
+            Dimensión de la entrada secuencial.
+        return_sequences : bool, optional
+            Si ``True`` devuelve toda la secuencia de estados, de lo contrario
+            solo el último estado.
+        """
         super(SP_LSTM, self).__init__(**kwargs)
         self.units = units
         self.input_dim = input_dim
@@ -46,6 +73,8 @@ class SP_LSTM(Layer):
         self.cell = SP_LSTM_Cell(units, input_dim)
 
     def call(self, inputs):
+        """Ejecuta la capa sobre una secuencia de entrada."""
+
         h_prev = tf.zeros((tf.shape(inputs)[0], self.units))
         c_prev = tf.zeros((tf.shape(inputs)[0], self.units))
         outputs = []

@@ -1,3 +1,5 @@
+"""Compara métricas entre la simulación con IA y la línea base."""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
@@ -27,6 +29,19 @@ labels = ['Baseline', 'IA']
 
 # === Función para crear cada figura
 def crear_grafico(valores, ylabel, titulo, filename):
+    """Genera y guarda un gráfico de barras comparativo.
+
+    Parameters
+    ----------
+    valores : list[float]
+        Valores a mostrar en las barras.
+    ylabel : str
+        Etiqueta del eje Y.
+    titulo : str
+        Título de la figura.
+    filename : str
+        Ruta donde se guardará la imagen generada.
+    """
     fig, ax = plt.subplots(figsize=(6, 5))
     bars = ax.bar(labels, valores, color=["gray", "steelblue"])
 

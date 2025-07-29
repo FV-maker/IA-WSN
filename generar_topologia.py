@@ -1,3 +1,5 @@
+"""Genera la topología de la red de sensores para las simulaciones."""
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -39,6 +41,24 @@ df_topo = pd.DataFrame(nodos)                # DataFrame con la topología inici
 
 # === Validar conectividad ===
 def verificar_topologia(df, rango, min_grado):
+    """Comprueba que la red sea conexa y con grado mínimo adecuado.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        DataFrame con columnas ``nodo``, ``x`` y ``y``.
+    rango : float
+        Distancia máxima para conectar dos nodos.
+    min_grado : int
+        Número mínimo de vecinos por nodo sensor.
+
+    Returns
+    -------
+    tuple
+        ``(grafo, es_valido, grados)`` donde ``grafo`` es la topología en
+        formato NetworkX, ``es_valido`` indica si cumple conectividad y grado
+        mínimo, y ``grados`` es un diccionario con el grado de cada nodo.
+    """
     G = nx.Graph()
     # Agrega nodos con sus posiciones
     for _, row in df.iterrows():
@@ -52,7 +72,11 @@ def verificar_topologia(df, rango, min_grado):
                     G.add_edge(ni["nodo"], nj["nodo"])
     grados = dict(G.degree())
     # Retorna el grafo, si es conexo y cumple el grado mínimo, y los grados de los nodos
-    return G, nx.is_connected(G) and all(g >= min_grado for n, g in grados.items() if n != "sink"), grados
+    return (
+        G,
+        nx.is_connected(G) and all(g >= min_grado for n, g in grados.items() if n != "sink"),
+        grados,
+    )
 
 # === Generar hasta lograr topología válida ===
 intentos = 0

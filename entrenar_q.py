@@ -1,3 +1,5 @@
+"""Entrena una tabla Q usando predicciones del modelo SP-LSTM."""
+
 import pandas as pd
 import numpy as np
 import joblib
@@ -7,14 +9,15 @@ import networkx as nx
 import random
 import logging
 import time
-from splstm_2 import SP_LSTM  # Asegúrate de que este archivo esté correctamente adaptado
+from splstm_2 import SP_LSTM  # Capa personalizada SP-LSTM
 
 # === Configuración general ===
-TOPO_PATH = "Data/topologia/topologia_nodos.csv"           # Ruta a la topología de nodos
-MODEL_PATH = "modelo_SP_lstm/modelo_entrenado.keras"   # Ruta al modelo SP-LSTM entrenado
-SCALER_PATH = "modelo_SP_lstm/scaler_x.save"           # Ruta al scaler de variables auxiliares
-QLEARN_DIR = "resultados_q_learning_splstm"                       # Carpeta de salida para resultados Q-Learning
-os.makedirs(QLEARN_DIR, exist_ok=True)                            # Crea la carpeta si no existe
+# === Configuración general ===
+TOPO_PATH = "Data/topologia/topologia_nodos.csv"  # Ruta a la topología de nodos
+MODEL_PATH = "modelo_SP_lstm/modelo_entrenado.keras"  # Modelo SP-LSTM entrenado
+SCALER_PATH = "modelo_SP_lstm/scaler_x.save"  # Scaler de variables auxiliares
+QLEARN_DIR = "resultados_q_learning_splstm"  # Carpeta de salida
+os.makedirs(QLEARN_DIR, exist_ok=True)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s')
 
@@ -22,13 +25,15 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(me
 df_topo = pd.read_csv(TOPO_PATH)                                  # Carga la topología de nodos
 G = nx.Graph()
 for _, row in df_topo.iterrows():
-    G.add_node(row["nodo"], tipo=row["tipo"], pos=(row["x"], row["y"]))  # Agrega nodos al grafo
+    # Cada nodo se añade con su tipo y posición
+    G.add_node(row["nodo"], tipo=row["tipo"], pos=(row["x"], row["y"]))
 for i, ni in df_topo.iterrows():
     for j, nj in df_topo.iterrows():
         if ni["nodo"] != nj["nodo"]:
-            d = np.linalg.norm([ni["x"] - nj["x"], ni["y"] - nj["y"]])   # Calcula distancia entre nodos
+            d = np.linalg.norm([ni["x"] - nj["x"], ni["y"] - nj["y"]])
             if d <= 55:
-                G.add_edge(ni["nodo"], nj["nodo"], weight=d)             # Agrega arista si están dentro del rango
+                # Conectamos los nodos que están dentro del rango de comunicación
+                G.add_edge(ni["nodo"], nj["nodo"], weight=d)
 
 sink = df_topo[df_topo["tipo"] == "sink"]["nodo"].iloc[0]                # Nodo sink
 nodos = df_topo[df_topo["tipo"] == "sensor"]["nodo"].tolist()            # Lista de sensores
@@ -47,14 +52,48 @@ cache_pred = {}         # Caché para predicciones de throughput
 
 # Función para discretizar el throughput predicho
 def discretizar(val):
-    if val < 0.05: return "muy_bajo"
-    elif val < 0.12: return "bajo"
-    elif val < 0.20: return "medio"
-    elif val < 0.32: return "alto"
-    else: return "muy_alto"
+    """Clasifica un valor de throughput en rangos discretos.
+
+    Parameters
+    ----------
+    val : float
+        Throughput en el rango [0, 1].
+
+    Returns
+    -------
+    str
+        Etiqueta categórica que representa el nivel de throughput
+        (muy_bajo, bajo, medio, alto o muy_alto).
+    """
+    if val < 0.05:
+        return "muy_bajo"
+    elif val < 0.12:
+        return "bajo"
+    elif val < 0.20:
+        return "medio"
+    elif val < 0.32:
+        return "alto"
+    else:
+        return "muy_alto"
 
 # Función para predecir el throughput de un enlace usando el modelo SP-LSTM
 def predecir_throughput(a, b, t):
+    """Predice el throughput para un enlace específico.
+
+    Parameters
+    ----------
+    a : str
+        Nodo de origen.
+    b : str
+        Nodo de destino.
+    t : int
+        Instante de tiempo de la predicción.
+
+    Returns
+    -------
+    float
+        Valor de throughput estimado en el rango [0, 1].
+    """
     key = (a, b, t)
     if key in cache_pred:
         return cache_pred[key]
@@ -73,6 +112,7 @@ def predecir_throughput(a, b, t):
     return val
 
 # === Hiperparámetros ===
+# Definen la dinámica del algoritmo Q-Learning
 EPISODIOS = 300
 MAX_SALTOS = 12
 ALPHA = 0.1
@@ -86,6 +126,7 @@ logging.info("Iniciando entrenamiento Q-Learning con SP-LSTM...")
 start_global = time.time()
 
 # === Entrenamiento Q-Learning ===
+# Episodios de aprendizaje para construir la tabla Q
 for ep in range(EPISODIOS):
     start_ep = time.time()
     total_reward = 0
@@ -102,26 +143,28 @@ for ep in range(EPISODIOS):
             if random.random() < P_FAIL:
                 break  # Simula un fallo de enlace
 
-            # Selección de acción (vecino) usando política epsilon-greedy
-            if random.random() < EPSILON:
-                accion = min(vecinos, key=lambda v: nx.shortest_path_length(G, v, sink))
-            else:
-                candidatos = [(v, Q.get((actual, v), 0)) for v in vecinos]
-                accion = max(candidatos, key=lambda x: x[1])[0]
+        # Selección de acción (vecino) usando política epsilon-greedy
+        if random.random() < EPSILON:
+            accion = min(vecinos, key=lambda v: nx.shortest_path_length(G, v, sink))
+        else:
+            candidatos = [(v, Q.get((actual, v), 0)) for v in vecinos]
+            accion = max(candidatos, key=lambda x: x[1])[0]
 
-            # Cálculo de recompensa
-            reward = 10 - 0.5 * salto if accion == sink else -1
-            futuro = G.neighbors(accion)
-            max_q = max([Q.get((accion, v), 0) for v in futuro], default=0)
-            # Actualización de la tabla Q
-            Q[(actual, accion)] = Q.get((actual, accion), 0) + ALPHA * (reward + GAMMA * max_q - Q.get((actual, accion), 0))
+        # Cálculo de recompensa
+        reward = 10 - 0.5 * salto if accion == sink else -1
+        futuro = G.neighbors(accion)
+        max_q = max([Q.get((accion, v), 0) for v in futuro], default=0)
+        # Actualización de la tabla Q
+        Q[(actual, accion)] = Q.get((actual, accion), 0) + ALPHA * (
+            reward + GAMMA * max_q - Q.get((actual, accion), 0)
+        )
 
-            actual = accion
-            t += 1
-            total_reward += reward
+        actual = accion
+        t += 1
+        total_reward += reward
 
-            if actual == sink:
-                break
+        if actual == sink:
+            break
 
     EPSILON = max(EPSILON * EPSILON_DECAY, EPSILON_MIN)  # Decaimiento de epsilon
     rewards.append(total_reward)
@@ -133,5 +176,9 @@ dur_total = time.time() - start_global
 logging.info(f" Entrenamiento finalizado en {dur_total/60:.2f} minutos.")
 
 # === Guardar resultados ===
-pd.DataFrame({"episodio": list(range(EPISODIOS)), "recompensa_total": rewards}).to_csv(f"{QLEARN_DIR}/recompensas.csv", index=False)
-pd.DataFrame([{"origen": k[0], "accion": k[1], "Q": v} for k, v in Q.items()]).to_csv(f"{QLEARN_DIR}/tabla_q.csv", index=False)
+pd.DataFrame({"episodio": list(range(EPISODIOS)), "recompensa_total": rewards}).to_csv(
+    f"{QLEARN_DIR}/recompensas.csv", index=False
+)
+pd.DataFrame([
+    {"origen": k[0], "accion": k[1], "Q": v} for k, v in Q.items()
+]).to_csv(f"{QLEARN_DIR}/tabla_q.csv", index=False)

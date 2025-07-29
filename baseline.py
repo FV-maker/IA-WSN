@@ -1,3 +1,10 @@
+"""Simulación base de enrutamiento sin inteligencia artificial.
+
+Los paquetes se encaminan de cada sensor al sink eligiendo siempre el
+vecino más cercano. Los resultados permiten comparar con la estrategia
+propuesta basada en aprendizaje automático.
+"""
+
 import pandas as pd
 import numpy as np
 import os
@@ -6,7 +13,7 @@ import random
 import logging
 
 # === Configuración general ===
-SEED = 42
+SEED = 42  # Semilla para reproducibilidad
 np.random.seed(SEED)
 random.seed(SEED)
 
@@ -38,6 +45,18 @@ nodos = df_topo[df_topo["tipo"] == "sensor"]["nodo"].tolist()            # Lista
 
 # === FUNCIÓN THROUGHPUT BASELINE ===
 def estimar_throughput(distancia):
+    """Calcula la probabilidad de éxito de transmisión.
+
+    Parameters
+    ----------
+    distancia : float
+        Distancia entre el nodo emisor y su vecino en metros.
+
+    Returns
+    -------
+    float
+        Porcentaje de paquetes que se esperan transmitir con éxito.
+    """
     if distancia <= 15:
         return 0.95
     elif distancia <= 30:

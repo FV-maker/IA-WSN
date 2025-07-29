@@ -1,3 +1,5 @@
+"""Genera la topología de la red de sensores para las simulaciones."""
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt

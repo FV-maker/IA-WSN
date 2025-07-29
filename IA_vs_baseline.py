@@ -1,3 +1,5 @@
+"""Compara métricas entre la simulación con IA y la línea base."""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np

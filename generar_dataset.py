@@ -1,21 +1,24 @@
+"""Genera un dataset sintético de enlaces con diferentes niveles de throughput."""
+
 import pandas as pd
 import numpy as np
 import math
 import os
 
 # === Configuración ===
-TIEMPO_SIMULACION = 100                         # Número de instantes de simulación
-RANGO_COMUNICACION = 55                          # Rango de comunicación entre nodos (metros)
-NOISE_STD = 0.1                                  # Desviación estándar del ruido (simulación)
-VENTANA_PROMEDIO = 5                             # Ventana para el promedio móvil
-TOPO_PATH = "Data/topologia/topologia.csv"       # Ruta a la topología de nodos
-OUTPUT_DIR = "Dataset"                   # Carpeta de salida para el dataset
-os.makedirs(OUTPUT_DIR, exist_ok=True)           # Crea la carpeta si no existe
+TIEMPO_SIMULACION = 100  # Número de instantes simulados
+RANGO_COMUNICACION = 55  # Rango de comunicación entre nodos (m)
+NOISE_STD = 0.1          # Desviación estándar del ruido
+VENTANA_PROMEDIO = 5     # Tamaño de la ventana para el promedio móvil
+TOPO_PATH = "Data/topologia/topologia.csv"  # Archivo con las posiciones de los nodos
+OUTPUT_DIR = "Dataset"  # Carpeta de salida
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # === Cargar topología ===
 df_nodos = pd.read_csv(TOPO_PATH)                # Carga la topología de nodos desde CSV
 
 # === Crear enlaces válidos ===
+# Se generan todos los pares de nodos conectables dentro del rango
 enlaces = []
 for i, nodo_i in df_nodos.iterrows():
     for j, nodo_j in df_nodos.iterrows():
@@ -31,8 +34,8 @@ for i, nodo_i in df_nodos.iterrows():
 
 # === Simulación por tiempo y enlace ===
 registros = []
-for t in range(TIEMPO_SIMULACION):              # Para cada instante de tiempo
-    for enlace in enlaces:                      # Para cada enlace válido
+for t in range(TIEMPO_SIMULACION):  # Para cada instante de tiempo
+    for enlace in enlaces:  # Para cada enlace válido
         base = np.exp(-0.05 * enlace["distancia"])      # Throughput base según distancia
         ruido = np.random.normal(0, NOISE_STD)          # Ruido gaussiano
         throughput = max(base + ruido, 0.0)             # Throughput instantáneo (no negativo)

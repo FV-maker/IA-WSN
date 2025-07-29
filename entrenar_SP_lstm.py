@@ -1,3 +1,5 @@
+"""Entrena el modelo SP-LSTM para estimar el throughput entre nodos."""
+
 import pandas as pd
 import numpy as np
 import os
@@ -12,15 +14,18 @@ from splstm_2 import SP_LSTM
 
 
 # === Rutas y configuración ===
+# Ubicación del dataset de entrenamiento y carpeta de salida
 DATA_PATH = "Dataset/Dataset.csv"
 MODEL_DIR = "modelo_SP_lstm"
 os.makedirs(MODEL_DIR, exist_ok=True)
 
 # === Cargar y preparar los datos ===
 df = pd.read_csv(DATA_PATH)
+# Codificamos el identificador del enlace a un valor numérico
 df["link_id_code"] = df["link_id"].astype("category").cat.codes
 
 # === Variables de entrada
+# Datos de entrada secuenciales y auxiliares
 X_seq = df[["moving_avg_throughput"]].values.reshape(-1, 1, 1)
 X_aux = df[["link_id_code", "time", "moving_avg_throughput", "Time_Average_Throughput"]].values
 y = df["throughput_instantaneo"].values
@@ -28,6 +33,7 @@ y = df["throughput_instantaneo"].values
 # === Escalado
 scaler = MinMaxScaler()
 X_aux_scaled = scaler.fit_transform(X_aux)
+# Guardamos el scaler para usarlo durante la inferencia
 joblib.dump(scaler, f"{MODEL_DIR}/scaler_X.save")
 
 # === División de datos
@@ -38,8 +44,11 @@ X_seq_train, X_seq_test, X_aux_train, X_aux_test, y_train, y_test = train_test_s
 # === Construcción del modelo
 input_seq = tf.keras.Input(shape=(1, 1))
 input_aux = tf.keras.Input(shape=(X_aux.shape[1],))
+# Capa recurrente personalizada que procesa la secuencia
 x = SP_LSTM(units=32, input_dim=1, return_sequences=False)(input_seq)
+# Concatenamos las características auxiliares
 x = tf.keras.layers.concatenate([x, input_aux])
+# Capas densas para producir la predicción final
 x = tf.keras.layers.Dense(16, activation='relu')(x)
 salida = tf.keras.layers.Dense(1, activation='linear')(x)
 
@@ -48,9 +57,12 @@ model.compile(optimizer='adam', loss='mse', metrics=['mae'])
 
 # === Entrenamiento
 history = model.fit(
-    [X_seq_train, X_aux_train], y_train,
+    [X_seq_train, X_aux_train],
+    y_train,
     validation_data=([X_seq_test, X_aux_test], y_test),
-    epochs=10, batch_size=64, verbose=1,
+    epochs=10,
+    batch_size=64,
+    verbose=1,
     shuffle=False  # clave para resultados deterministas
 )
 
@@ -70,7 +82,7 @@ plt.tight_layout()
 plt.savefig(f"{MODEL_DIR}/grafico_mse.png")
 plt.close()
 
-# === Evaluación final
+# === Evaluación final ===
 y_pred = model.predict([X_seq_test, X_aux_test])
 mae = mean_absolute_error(y_test, y_pred)
 mse = mean_squared_error(y_test, y_pred)

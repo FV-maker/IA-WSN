@@ -1,17 +1,28 @@
+"""Genera gráficos de diagnóstico para el modelo SP-LSTM.
+
+Se cargan las predicciones realizadas por el modelo y se comparan con
+los valores reales del dataset. También se leen las métricas de
+evaluación almacenadas en un archivo de texto para graficarlas.
+"""
+
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-# Cargar datos
+
+# === Cargar datos con predicciones y calcular error absoluto ===
 df = pd.read_csv("modelo_splstm_dinamicoSPP/dataset_con_predicciones.csv")
+
+# Error absoluto entre el throughput real e inferido por la red
 df["error_abs"] = np.abs(df["throughput_instantaneo"] - df["throughput_predicho"])
 # Cargar métricas desde archivo de texto
 with open("modelo_splstm_dinamicoSPP/metricas.txt") as f:
     lineas = f.readlines()
-mae = float(lineas[0].split(":")[1])
-mse = float(lineas[1].split(":")[1])
-r2 = float(lineas[2].split(":")[1])
+mae = float(lineas[0].split(":")[1])  # Error absoluto medio
+mse = float(lineas[1].split(":")[1])  # Error cuadrático medio
+r2 = float(lineas[2].split(":")[1])   # Coeficiente de determinación
 
-# Histograma del throughput predicho
+# === Histograma del throughput predicho ===
+# Permite observar la distribución de las predicciones del modelo
 plt.figure(figsize=(6, 4))
 plt.hist(df["throughput_predicho"], bins=20, color="skyblue", edgecolor="black")
 plt.title("Distribución del Throughput Predicho")
@@ -22,7 +33,8 @@ plt.tight_layout()
 plt.savefig("grafico_histograma_throughput.png")
 plt.show()
 
-# Dispersión real vs predicho
+# === Dispersión real vs. predicho ===
+# Cada punto representa una muestra coloreada según su error absoluto
 plt.figure(figsize=(6, 4))
 scatter = plt.scatter(
     df["throughput_instantaneo"],
@@ -42,7 +54,8 @@ plt.tight_layout()
 plt.savefig("grafico_dispersion_coloreado.png")
 plt.show()
 
-# Gráfico de métricas
+# === Gráfico de métricas generales ===
+# Resumen de MAE, MSE y R² obtenidos durante la evaluación
 plt.figure(figsize=(5, 4))
 metricas = [mae, mse, r2]
 nombres = ['MAE', 'MSE', 'R²']

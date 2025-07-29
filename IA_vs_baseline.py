@@ -3,8 +3,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # === Definir rutas de carpetas
-carpeta_ia = "resultados_simulacion_dinamica_iaSP"
-carpeta_baseline = "resultados_baseline_dinamico"
+carpeta_ia = "resultados_simulacion_dinamica_ia"
+carpeta_baseline = "resultados_baseline"
 
 # === Cargar archivos IA
 df_consumo_ia = pd.read_csv(f"{carpeta_ia}/consumo.csv")
